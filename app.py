@@ -12,7 +12,7 @@ app.config["TEMPLATES_AUTO_RELOAD"] = True
 
 SECRET_KEY = 'Hanghae99team10project'
 
-client = MongoClient('mongodb+srv://test:sparta@cluster0.psxi0.mongodb.net/Cluster0?retryWrites=true&w=majority')
+client = MongoClient('')
 db = client.dbsparta
 
 
