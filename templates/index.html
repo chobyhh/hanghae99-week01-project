@@ -39,10 +39,21 @@
         <div class="modal hidden">
           <div class="bg"></div>
           <div class="modalBox">
-            <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Consectetur quam nobis quis corrupti amet
-              maxime neque, optio, in illo, voluptatibus consequuntur! Rerum quo ea nulla qui, maxime consectetur magni
-              soluta!</p>
-            <button class="closeBtn">닫기</button>
+            <div class="input-group mb-3">
+              <input type="file" id="inputImage">
+
+              <button id="sendButton">보내기</button>
+
+              <img src="" class="uploadImage">
+            </div>
+            <div class="form-floating">
+              <textarea class="form-control" placeholder="Leave a comment here" id="floatingTextarea2"
+              style="resize:none"></textarea>
+            </div>
+            <div id="btn_group">
+              <button class="closeBtn">닫기</button>
+              <button class="saveBtn">저장</button
+            </div>
           </div>
         </div>
         <!-- =====모달 섹션 끝===== -->
@@ -64,8 +75,43 @@
 
       document.querySelector(".openBtn").addEventListener("click", open);
       document.querySelector(".closeBtn").addEventListener("click", close);
+      document.querySelector(".saveBtn").addEventListener("click", close);
       document.querySelector(".bg").addEventListener("click", close);
+      document.querySelector("#sendButton").addEventListener('click', () => {
+        let selectFile = document.querySelector("#inputImage").files[0];
+        const file = URL.createObjectURL(selectFile);
+        document.querySelector(".uploadImage").src = file;
+      })
+
       <!-- =====모달 JS 끝===== -->
+      function previewImage(f) {
+
+        var file = f.files;
+
+        // 확장자 체크
+        if (!/\.(gif|jpg|jpeg|png)$/i.test(file[0].name)) {
+          alert('gif, jpg, png 파일만 선택해 주세요.\n\n현재 파일 : ' + file[0].name);
+
+          // 선택한 파일 초기화
+          f.outerHTML = f.outerHTML;
+
+          document.getElementById('preview').innerHTML = '';
+
+        } else {
+
+          // FileReader 객체 사용
+          var reader = new FileReader();
+
+          // 파일 읽기가 완료되었을때 실행
+          reader.onload = function (rst) {
+            document.getElementById('preview').innerHTML = '<img src="' + rst.target.result + '">';
+          }
+
+          // 파일을 읽는다
+          reader.readAsDataURL(file[0]);
+
+        }
+      }
     </script>
   </body>
 </html>
