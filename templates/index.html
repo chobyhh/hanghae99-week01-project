@@ -31,7 +31,7 @@
     <main class="main">
         <div id="slide" class="slide"></div>
         <div>
-            <button>내 방 자랑하기</button>
+            <button class="openBtn">내 방 자랑하기</button>
         </div>
         <div class="picture-list">
             <a href="#">1</a>
@@ -40,6 +40,25 @@
             <a href="#">4</a>
         </div>
         <!-- =====모달 섹션시작===== -->
+
+        <div class="modal hidden">
+            <div class="bg"></div>
+            <div class="modalBox">
+                <div class="input-group mb-3">
+                    <div class="custom-file">
+                        <input type="file" class="custom-file-input" id="file"/>
+                        <label class="custom-file-label" for="file">사진 선택하기</label>
+                    </div>
+                </div>
+                <div class="form-floating">
+              <textarea class="form-control" placeholder="Leave a comment here" id="content"
+                        style="resize:none"></textarea>
+                </div>
+                <button onclick="saving()" type="button" class="btn btn-primary">
+                    저장하기
+                </button>
+            </div>
+        </div>
         <!-- =====모달 섹션 끝===== -->
     </main>
     <!-- 메인 (슬라이드, 사진상위노출) -->
@@ -47,6 +66,58 @@
     <footer class="footer">copyright</footer>
     <!-- footer copyright 끝 -->
 </div>
-<script></script>
+<script src="https://cdn.jsdelivr.net/npm/bs-custom-file-input/dist/bs-custom-file-input.js"></script>
+<script>
+    $(document).ready(function () {
+        bsCustomFileInput.init();
+        listing();
+    });
+
+    <!-- =====모달 JS===== -->
+    const open = () => {
+        document.querySelector(".modal").classList.remove("hidden");
+    }
+
+    const close = () => {
+        document.querySelector(".modal").classList.add("hidden");
+    }
+
+    document.querySelector(".openBtn").addEventListener("click", open);
+    document.querySelector(".closeBtn").addEventListener("click", close);
+    document.querySelector(".bg").addEventListener("click", close);
+    document.querySelector("#sendButton").addEventListener('click', () => {
+        {#let selectFile = document.querySelector("#inputImage").files[0];#}
+        {#const file = URL.createObjectURL(selectFile);#}
+        {#document.querySelector(".uploadImage").src = file;#}
+    })
+    {#<!-- =====모달 JS 끝===== -->#}
+    {#<!-- =====DB에 저장===== -->#}
+
+    function saving() {
+        /*input 데이터 가져오기*/
+        let content = $("#content").val();
+        /*$("#file")[0]->input태그*/ /*.files -> length(갯수)*/
+        let file = $("#file")[0].files[0];
+        let form_data = new FormData();
+        /*파일 데이터가 있을경우 new FormData를 변수(form_data)에 대입하고 변수(form_data)를 input데이터를 append 해서 넣어줌*/
+        form_data.append("file_give", file);
+        form_data.append("content_give", content);
+        /*app.py /diary api로 데이터를 보내주고 받아옴*/
+        $.ajax({
+            type: "POST",
+            url: "/diary",
+            data: form_data,
+            cache: false,
+            contentType: false,
+            processData: false,
+            success: function (response) {
+                alert(response['msg']);
+                window.location.reload();
+            },
+        });
+    }
+
+    {#<!-- =====DB에 완료===== -->#}
+</script>
 </body>
 </html>

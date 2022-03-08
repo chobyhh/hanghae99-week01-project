@@ -1,24 +1,36 @@
 from pymongo import MongoClient
+from datetime import datetime, timedelta
 import jwt
 import datetime
 import hashlib
+# import base64
+# import json
 from flask import Flask, render_template, jsonify, request, redirect, url_for
 from werkzeug.utils import secure_filename
-from datetime import datetime, timedelta
 
 
 app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True
+app.config['UPLOAD_FOLDER'] = "./static/profile_pics"
 
 SECRET_KEY = 'Hanghae99team10project'
 
-client = MongoClient('')
-db = client.dbsparta
+
+client = MongoClient("mongodb+srv://sharerooom:shareroom@cluster0.skz7o.mongodb.net/cluster0?retryWrites=true&w=majority")
+db = client.shareroom
 
 
 @app.route('/')
 def home():
-    return render_template('index.html')
+    token_receive = request.cookies.get('mytoken')
+    try:
+        payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
+        user_info = db.users.find_one({"username": payload["id"]})
+        return render_template('index.html', user_info=user_info)
+    except jwt.ExpiredSignatureError:
+        return redirect(url_for("login", msg="로그인 시간이 만료되었습니다."))
+    except jwt.exceptions.DecodeError:
+        return redirect(url_for("login", msg="로그인 정보가 존재하지 않습니다."))
 
 
 @app.route('/login')
@@ -128,6 +140,48 @@ def check_dup():
 #     except (jwt.ExpiredSignatureError, jwt.exceptions.DecodeError):
 #         return redirect(url_for("home"))
 
+######################################################################################
+# 병윤님 섹션 추가
+######################################################################################
+
+@app.route('/detail', methods=['GET'])
+def show_detail():
+    diaries = list(db.diary.find({}, {'_id': False}))
+    # print(diaries)
+    return render_template('index.html', diaries=diaries)
+
+
+@app.route('/diary', methods=['POST'])
+def save_diary():
+    # 데이터를 reviw.html에서 받아옴
+    content_receive = request.form['content_give']
+
+    file = request.files["file_give"]
+    # 확장자명 만듬
+    extension = file.filename.split('.')[-1]
+
+    # datetime 클래스로 현재 날짜와시간 만들어줌 -> 현재 시각을 출력하는 now() 메서드
+    today = datetime.datetime.now()
+    mytime = today.strftime('%Y-%m-%d-%H-%M-%S')
+
+    filename = f'file-{mytime}'
+    # 파일에 시간붙여서 static폴더에 filename 으로 저장
+    save_to = f'static/{filename}.{extension}'
+    file.save(save_to)
+
+    doc = {
+        'content': content_receive,
+        'file': f'{filename}.{extension}',
+        'time': today.strftime('%Y.%m.%d')
+    }
+    # diary collection에 저장
+    db.diary.insert_one(doc)
+
+    return jsonify({'msg': '저장 완료!'})
+
+######################################################################################
 
 if __name__ == '__main__':
     app.run('0.0.0.0', port=5000, debug=True)
+
+
