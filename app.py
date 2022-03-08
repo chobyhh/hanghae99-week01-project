@@ -5,7 +5,7 @@ import requests
 
 app = Flask(__name__)
 
-client = MongoClient('mongodb+srv://test:sparta@cluster0.xtaz0.mongodb.net/cluster0?retryWrites=true&w=majority',tlsCAFile=ca)
+client = MongoClient('',tlsCAFile=ca)
 db = client.dbsparta_miniP
 
 
